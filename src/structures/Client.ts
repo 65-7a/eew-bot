@@ -9,9 +9,12 @@ import { CommandType } from "../typings/Command";
 import glob from "glob-promise";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
+import winston from "winston";
+import { winstonConfig } from "../config/winston";
 
 export class ExtendedClient extends Client {
-    commands: Collection<string, CommandType> = new Collection();
+    logger = winston.createLogger(winstonConfig);
+    commands = new Collection<string, CommandType>();
 
     constructor() {
         super({
@@ -34,10 +37,10 @@ export class ExtendedClient extends Client {
     async registerCommands({ commands, guildId }: RegisterCommandsOptions) {
         if (guildId) {
             this.guilds.cache.get(guildId)?.commands.set(commands);
-            console.log(`Registering commands to ${guildId}`);
+            this.logger.info(`Registering commands to ${guildId}`);
         } else {
             this.application?.commands.set(commands);
-            console.log("Registering global commands");
+            this.logger.info("Registering global commands");
         }
     }
 
