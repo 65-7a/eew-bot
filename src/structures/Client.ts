@@ -2,7 +2,8 @@ import {
     ApplicationCommandDataResolvable,
     Client,
     ClientEvents,
-    Collection
+    Collection,
+    Intents
 } from "discord.js";
 import { CommandType } from "../typings/Command";
 import glob from "glob-promise";
@@ -13,7 +14,12 @@ export class ExtendedClient extends Client {
     commands: Collection<string, CommandType> = new Collection();
 
     constructor() {
-        super({ intents: 32767 });
+        super({
+            intents: new Intents(32767).remove([
+                "GUILD_PRESENCES",
+                "GUILD_MEMBERS"
+            ])
+        });
     }
 
     start() {
@@ -43,7 +49,6 @@ export class ExtendedClient extends Client {
         commandFiles.forEach(async (filePath) => {
             const command: CommandType = await this.importFile(filePath);
             if (!command.name) return;
-            console.log(command);
 
             this.commands.set(command.name, command);
             slashCommands.push(command);
