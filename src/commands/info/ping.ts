@@ -2,8 +2,8 @@ import { Command } from "../../structures/Command";
 
 export default new Command({
     name: "ping",
-    description: "replies with pong",
+    description: "pong",
     run: async ({ interaction }) => {
-        interaction.followUp("Pong3");
+        interaction.followUp("pong");
     }
 });
