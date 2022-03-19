@@ -3,12 +3,12 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "dev": "ts-node-dev src/index.ts",
+        "dev": "nodemon src/index.ts",
         "start": "node dist/index.js",
         "build": "tsc",
         "watch": "tsc -w",
         "lint": "eslint \"src/**/*.ts\"",
-        "format": "npx prettier --config .prettierrc.json \"src/**/*.ts\" --write"
+        "format": "prettier --config .prettierrc.json \"src/**/*.ts\" --write"
     },
     "keywords": [],
     "author": "",

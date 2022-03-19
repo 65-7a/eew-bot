@@ -17,7 +17,7 @@ interface RunOptions {
     args: CommandInteractionOptionResolver;
 }
 
-type RunFunction = (options: RunOptions) => never;
+type RunFunction = (options: RunOptions) => unknown;
 
 export type CommandType = {
     userPermissions?: PermissionResolvable[];

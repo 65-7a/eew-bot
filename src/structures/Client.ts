@@ -20,6 +20,7 @@ export class ExtendedClient extends Client {
         this.registerModules();
         this.login(process.env.BOT_TOKEN);
     }
+
     async importFile(filePath: string) {
         return (await import(filePath))?.default;
     }
@@ -61,7 +62,7 @@ export class ExtendedClient extends Client {
                 filePath
             );
 
-            this.on(event.event, event.run);
+            this.on(event.event, event.run as never);
         });
     }
 }
