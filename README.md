@@ -1,6 +1,6 @@
-# Bot
+# EEW Bot
 
-Bot is a discord.js bot built with TypeScript.
+Japanese earthquake bot for Discord built with TypeScript.
 
 ## Installation
 
