@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
@@ -22,6 +21,4 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script: |
-            screen -dmS node
-            screen -S node -p 0 -X stuff 'sh ~/deploy.sh\n'
+          script: "screen -dm sh deploy.sh"
