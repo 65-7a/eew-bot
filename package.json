@@ -1,7 +1,9 @@
 {
-    "name": "typescript-bot",
+    "name": "eew-bot",
     "version": "1.0.0",
-    "main": "index.js",
+    "license": "GPL-3.0-or-later",
+    "author": "65_7a",
+    "private": "true",
     "scripts": {
         "dev": "nodemon src/index.ts",
         "start": "node dist/index.js",
@@ -11,10 +13,6 @@
         "format": "prettier \"src/**/*.ts\" --write",
         "prepare": "husky install"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "description": "",
     "dependencies": {
         "discord.js": "^13.6.0",
         "dotenv": "^16.0.0",
