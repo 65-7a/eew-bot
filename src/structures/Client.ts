@@ -11,7 +11,7 @@ import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
 import winston from "winston";
 import { winstonConfig } from "../config/winston";
-import { P2PQuakeClient } from "../p2pQuake/p2pquake";
+import { P2PQuakeClient } from "../p2pQuake/p2pQuake";
 import { importFile } from "../util/util";
 
 export class ExtendedClient extends Client {
