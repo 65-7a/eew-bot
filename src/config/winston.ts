@@ -32,19 +32,25 @@ export const winstonConfig: winston.LoggerOptions = {
         })(),
         winston.format.timestamp(),
         winston.format.errors({ stack: true }),
-        winston.format.printf(
-            (info) => `[${info.timestamp}] [${info.level}]: ${info.message}`
-        )
+        winston.format.printf((info) => {
+            if (typeof info.message === "object") {
+                info.message = JSON.stringify(info.message, null, 4);
+            }
+
+            return `[${info.timestamp}] [${info.level}]: ${info.message}`;
+        })
     ),
     levels: customLevels.levels,
     transports: [
         new winston.transports.File({
             filename: `logs/combined.log`,
-            level: "success"
+            level: "success",
+            handleExceptions: true
         }),
         new winston.transports.File({
             filename: `logs/errors.log`,
-            level: "error"
+            level: "error",
+            handleExceptions: true
         })
     ]
 };
