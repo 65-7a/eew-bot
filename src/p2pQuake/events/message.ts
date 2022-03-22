@@ -1,5 +1,5 @@
 import { MessageEmbed } from "discord.js";
-import { client } from "../..";
+import { client, logger } from "../..";
 import { Event } from "../structures/Event";
 
 /**
@@ -15,13 +15,13 @@ export default new Event("message", async (data) => {
 
     if (json.code === 555 || json.code === 561 || json.code === 9611) return;
 
-    client.logger.info(json);
+    logger.info(json);
 
     const embed = new MessageEmbed().addFields(
         Object.entries(json).map(([k, v]) => {
             return {
                 name: k,
-                value: v.toString()
+                value: v?.toString() || "null"
             };
         })
     );
@@ -33,7 +33,7 @@ export default new Event("message", async (data) => {
                 embeds: [embed]
             });
         } catch (e) {
-            client.logger.error(e);
+            logger.error(e);
         }
     }
 });

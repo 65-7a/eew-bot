@@ -24,25 +24,44 @@ const customLevels = {
 winston.addColors(customLevels.colors);
 
 export const winstonConfig: winston.LoggerOptions = {
-    level: "debug",
-    format: winston.format.simple(),
+    level: "success",
+    format: winston.format.combine(
+        winston.format((info) => {
+            info.level = info.level.toUpperCase();
+            return info;
+        })(),
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.printf(
+            (info) => `[${info.timestamp}] [${info.level}]: ${info.message}`
+        )
+    ),
     levels: customLevels.levels,
     transports: [
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format((info) => {
-                    info.level = info.level.toUpperCase();
-                    return info;
-                })(),
-                winston.format.timestamp(),
-                winston.format.errors({ stack: true }),
-                winston.format.colorize({ all: true }),
-                winston.format.printf(
-                    (info) =>
-                        `[${info.timestamp}] [${info.level}]: ${info.message}`
-                )
-            ),
-            handleExceptions: true
+        new winston.transports.File({
+            filename: `logs/combined.log`,
+            level: "success"
+        }),
+        new winston.transports.File({
+            filename: `logs/errors.log`,
+            level: "error"
         })
     ]
 };
+
+export const consoleTransport = new winston.transports.Console({
+    level: "debug",
+    format: winston.format.combine(
+        winston.format((info) => {
+            info.level = info.level.toUpperCase();
+            return info;
+        })(),
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.colorize({ all: true }),
+        winston.format.printf(
+            (info) => `[${info.timestamp}] [${info.level}]: ${info.message}`
+        )
+    ),
+    handleExceptions: true
+});

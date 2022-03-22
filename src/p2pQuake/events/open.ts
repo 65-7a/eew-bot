@@ -1,6 +1,6 @@
-import { client } from "../..";
 import { Event } from "../structures/Event";
+import { logger } from "../..";
 
 export default new Event("open", () => {
-    client.logger.info("Connected to P2PQuake websocket");
+    logger.info("Connected to P2PQuake websocket");
 });

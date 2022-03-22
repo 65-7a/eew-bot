@@ -9,13 +9,11 @@ import { CommandType } from "../typings/Command";
 import glob from "glob-promise";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
-import winston from "winston";
-import { winstonConfig } from "../config/winston";
 import { P2PQuakeClient } from "../p2pQuake/p2pQuake";
 import { importFile } from "../util/util";
+import { logger } from "..";
 
 export class ExtendedClient extends Client {
-    logger = winston.createLogger(winstonConfig);
     commands = new Collection<string, CommandType>();
     p2pQuake = new P2PQuakeClient();
 
@@ -36,10 +34,10 @@ export class ExtendedClient extends Client {
     async registerCommands({ commands, guildId }: RegisterCommandsOptions) {
         if (guildId) {
             this.guilds.cache.get(guildId)?.commands.set(commands);
-            this.logger.info(`Registering commands to ${guildId}`);
+            logger.info(`Registering commands to ${guildId}`);
         } else {
             this.application?.commands.set(commands);
-            this.logger.info("Registering global commands");
+            logger.info("Registering global commands");
         }
     }
 
