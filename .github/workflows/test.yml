@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+        - name: pass environment
+          uses: appleboy/ssh-action@master
+          env:
+            KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          with:
+            host: ${{ secrets.REMOTE_HOST }}
+            username: ${{ secrets.REMOTE_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            port: 22
+            envs: KEY
+            script: "touch eew-bot-key.pem; echo $KEY | eew-bot-key.pem"
