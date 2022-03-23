@@ -26,18 +26,30 @@ export default new Event("message", async (data) => {
             .setTitle("Earthquake Information")
             .addField(
                 "Hypocenter",
-                `json.earthquake.hypocenter.name (${json.earthquake.hypocenter.latitude}, ${json.earthquake.hypocenter.longitude})`,
+                `${json.earthquake.hypocenter.name} (${json.earthquake.hypocenter.latitude}, ${json.earthquake.hypocenter.longitude})`,
                 true
             )
-            .addField("Magnitude", json.earthquake.hypocenter.magnitude, true)
-            .addField("Depth", json.earthquake.hypocenter.depth + " km", true)
-            .addField("Maximum Intensity", json.earthquake.maxScale, true)
+            .addField(
+                "Magnitude",
+                json.earthquake.hypocenter.magnitude.toString(),
+                true
+            )
+            .addField(
+                "Depth",
+                json.earthquake.hypocenter.depth.toString() + " km",
+                true
+            )
+            .addField(
+                "Maximum Intensity",
+                json.earthquake.maxScale.toString(),
+                true
+            )
             .addField("Tsunami", json.earthquake.domesticTsunami, true)
             .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
             .setFooter({
                 text: `<t:${DateTime.fromFormat(
                     json.earthquake.time,
-                    "yyyy-MM-dd HH:mm:ss"
+                    "yyyy/MM/dd HH:mm:ss"
                 ).toUnixInteger()}:f>`
             })
             .setTimestamp();
