@@ -1,6 +1,8 @@
 import { MessageEmbed } from "discord.js";
+import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
+import { SubscribedChannel } from "./../../models/subscribedChannel";
 
 /**
  * 551: JMAQuake (earthquake information)
@@ -17,23 +19,50 @@ export default new Event("message", async (data) => {
 
     logger.info(json);
 
-    const embed = new MessageEmbed().addFields(
-        Object.entries(json).map(([k, v]) => {
-            return {
-                name: k,
-                value: v?.toString() || "null"
-            };
-        })
-    );
+    const embed = new MessageEmbed();
 
-    const channel = client.channels.cache.get("955233543011844116");
-    if (channel.isText()) {
-        try {
-            await channel.send({
-                embeds: [embed]
-            });
-        } catch (e) {
-            logger.error(e);
-        }
+    if (json.code === 551) {
+        embed
+            .setTitle("Earthquake Information")
+            .addField(
+                "Hypocenter",
+                `json.earthquake.hypocenter.name (${json.earthquake.hypocenter.latitude}, ${json.earthquake.hypocenter.longitude})`,
+                true
+            )
+            .addField("Magnitude", json.earthquake.hypocenter.magnitude, true)
+            .addField("Depth", json.earthquake.hypocenter.depth + " km", true)
+            .addField("Maximum Intensity", json.earthquake.maxScale, true)
+            .addField("Tsunami", json.earthquake.domesticTsunami, true)
+            .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
+            .setFooter({
+                text: `<t:${DateTime.fromFormat(
+                    json.earthquake.time,
+                    "yyyy-MM-dd HH:mm:ss"
+                ).toUnixInteger()}:f>`
+            })
+            .setTimestamp();
+    } else {
+        embed.addFields(
+            Object.entries(json).map(([k, v]) => {
+                return {
+                    name: k,
+                    value: v?.toString() || "null"
+                };
+            })
+        );
     }
+
+    const channels = await SubscribedChannel.find({}).exec();
+    channels.forEach(async (ch) => {
+        const channel = client.channels.cache.get(ch.id);
+        if (channel.isText()) {
+            try {
+                await channel.send({
+                    embeds: [embed]
+                });
+            } catch (e) {
+                logger.error(e);
+            }
+        }
+    });
 });

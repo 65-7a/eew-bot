@@ -9,13 +9,12 @@ import { CommandType } from "../typings/Command";
 import glob from "glob-promise";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
-import { P2PQuakeClient } from "../p2pQuake/p2pQuake";
 import { importFile } from "../util/util";
-import { logger } from "..";
+import { logger, p2pQuake } from "..";
+import mongoose from "mongoose";
 
 export class ExtendedClient extends Client {
     commands = new Collection<string, CommandType>();
-    p2pQuake = new P2PQuakeClient();
 
     constructor() {
         super({
@@ -26,9 +25,10 @@ export class ExtendedClient extends Client {
         });
     }
 
-    start() {
-        this.registerModules();
-        this.login(process.env.BOT_TOKEN);
+    async start() {
+        await mongoose.connect("mongodb://localhost:27017/test");
+        await this.registerModules();
+        await this.login(process.env.BOT_TOKEN);
     }
 
     async registerCommands({ commands, guildId }: RegisterCommandsOptions) {
@@ -68,6 +68,6 @@ export class ExtendedClient extends Client {
             this.on(event.event, event.run as never);
         });
 
-        await this.p2pQuake.registerModules();
+        await p2pQuake.registerModules();
     }
 }
