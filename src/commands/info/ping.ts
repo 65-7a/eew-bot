@@ -4,6 +4,6 @@ export default new Command({
     name: "ping",
     description: "pong",
     run: async ({ interaction }) => {
-        interaction.followUp("pong");
+        await interaction.followUp("pong");
     }
 });
