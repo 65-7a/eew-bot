@@ -8,9 +8,9 @@ import { SubscribedChannel } from "./../../models/subscribedChannel";
  * 551: JMAQuake (earthquake information)
  * 552: JMATsunami (tsunami forecast)
  * 554: EEWDetection (eew announcement detection)
- * 555: Areapeers (number of peers (sensors) in each region)
- * 561: Userquake (earthquake detection information)
- * 9611: UserquakeEvaluation (earthquake detection information evaluation result)
+ * 555: AreaPeers (number of peers (sensors) in each region)
+ * 561: UserQuake (earthquake detection information)
+ * 9611: UserQuakeEvaluation (earthquake detection information evaluation result)
  */
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString());
@@ -45,7 +45,15 @@ export default new Event("message", async (data) => {
             )
             .addField("Tsunami", json.earthquake.domesticTsunami, true)
             .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
-            .setTimestamp(parseDate(json.earthquake.time).toUnixInteger());
+            .setTimestamp(parseDate(json.earthquake.time).toJSDate())
+            .setImage(
+                `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/${json.earthquake.time
+                    .split(" ")[0]
+                    .replaceAll("/", "")}/${json.earthquake.time.replaceAll(
+                    /[/:]/g,
+                    ""
+                )}.jma_s.gif`
+            );
     } else {
         embed.addFields(
             Object.entries(json).map(([k, v]) => {
