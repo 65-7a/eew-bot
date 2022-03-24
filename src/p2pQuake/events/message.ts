@@ -14,7 +14,6 @@ import { SubscribedChannel } from "./../../models/subscribedChannel";
  */
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString());
-
     if (json.code === 555 || json.code === 561 || json.code === 9611) return;
 
     logger.info(json);
@@ -46,13 +45,7 @@ export default new Event("message", async (data) => {
             )
             .addField("Tsunami", json.earthquake.domesticTsunami, true)
             .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
-            .setFooter({
-                text: `<t:${DateTime.fromFormat(
-                    json.earthquake.time,
-                    "yyyy/MM/dd HH:mm:ss"
-                ).toUnixInteger()}:f>`
-            })
-            .setTimestamp();
+            .setTimestamp(parseDate(json.earthquake.time).toUnixInteger());
     } else {
         embed.addFields(
             Object.entries(json).map(([k, v]) => {
@@ -78,3 +71,7 @@ export default new Event("message", async (data) => {
         }
     });
 });
+
+function parseDate(date: string) {
+    return DateTime.fromFormat(date, "yyyy/MM/dd HH:mm:ss");
+}
