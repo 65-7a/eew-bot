@@ -45,12 +45,23 @@ export default new Event("message", async (data) => {
             )
             .addField("Tsunami", json.earthquake.domesticTsunami, true)
             .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
-            .setTimestamp(parseDate(json.earthquake.time).toJSDate())
+            .addField(
+                "Time",
+                parseDate(json.earthquake.time).toLocaleString(
+                    DateTime.DATETIME_FULL_WITH_SECONDS
+                )
+            )
+            .setDescription(
+                `Issued by ${json.issue.source} at ${parseDate(
+                    json.issue.time
+                ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`
+            )
+            .setTimestamp()
             .setImage(
                 `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/${json.earthquake.time
                     .split(" ")[0]
                     .replaceAll("/", "")}/${json.earthquake.time.replaceAll(
-                    /[/:]/g,
+                    /[/: ]/g,
                     ""
                 )}.jma_s.gif`
             );
@@ -81,5 +92,7 @@ export default new Event("message", async (data) => {
 });
 
 function parseDate(date: string) {
-    return DateTime.fromFormat(date, "yyyy/MM/dd HH:mm:ss");
+    return DateTime.fromFormat(date, "yyyy/MM/dd HH:mm:ss", {
+        zone: "Asia/Tokyo"
+    });
 }

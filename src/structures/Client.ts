@@ -67,7 +67,5 @@ export class ExtendedClient extends Client {
 
             this.on(event.event, event.run as never);
         });
-
-        await p2pQuake.registerModules();
     }
 }
