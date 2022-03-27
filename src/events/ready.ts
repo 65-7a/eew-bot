@@ -9,5 +9,5 @@ export default new Event("ready", async () => {
 
     logger.log("success", `Logged in as ${client.user.tag}`);
 
-    await p2pQuake.registerModules();
+    await p2pQuake.start();
 });
