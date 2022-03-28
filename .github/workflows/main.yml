@@ -25,7 +25,7 @@ jobs:
           ARGS: "-rltgoDzvO --delete"
           SOURCE: "./"
           TARGET: "/home/${{secrets.REMOTE_USER}}/eew-bot/"
-          EXCLUDE: "/node_modules/"
+          EXCLUDE: "/node_modules/, /.git/"
       - name: Execute remote ssh commands
         uses: appleboy/ssh-action@master
         with:
@@ -33,6 +33,4 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script: |
-            source ~/.bashrc
-            sh deploy.sh
+          script: "bash -i deploy.sh"
