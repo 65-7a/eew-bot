@@ -10,19 +10,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - name: scp ssh pipelines
-        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      - name: Deploy to Staging server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "./"
+          TARGET: "/home/${{secrets.REMOTE_USER}}/eew-bot/"
+          EXCLUDE: "/node_modules/"
+      - name: Execute remote ssh commands
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}
-          user: ${{ secrets.REMOTE_USER }}
+          username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          scp: |
-            ./ => "/home/azureuser/eew-bot/"
-          last_ssh: |
+          port: 22
+          script: |
+            source ~/.bashrc
             sh deploy.sh
