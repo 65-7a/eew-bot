@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
+import { parseDate } from "./../../util/util";
 
 /**
  * 551: JMAQuake (earthquake information)
@@ -16,7 +17,7 @@ export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString());
     if (json.code === 555 || json.code === 561 || json.code === 9611) return;
 
-    logger.info(json);
+    logger.verbose(json);
 
     const embed = new MessageEmbed();
 
@@ -58,12 +59,7 @@ export default new Event("message", async (data) => {
             )
             .setTimestamp()
             .setImage(
-                `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/${json.earthquake.time
-                    .split(" ")[0]
-                    .replaceAll("/", "")}/${json.earthquake.time.replaceAll(
-                    /[/: ]/g,
-                    ""
-                )}.jma_s.gif`
+                `https://www.p2pquake.net/app/images/${json["_id"]}_trim_big.png`
             );
     } else {
         embed.addFields(
@@ -90,9 +86,3 @@ export default new Event("message", async (data) => {
         }
     });
 });
-
-function parseDate(date: string) {
-    return DateTime.fromFormat(date, "yyyy/MM/dd HH:mm:ss", {
-        zone: "Asia/Tokyo"
-    });
-}

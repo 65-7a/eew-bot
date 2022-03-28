@@ -14,11 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: execute remote ssh commands
-        uses: appleboy/ssh-action@master
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: scp ssh pipelines
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
         with:
           host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
+          user: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: "sh deploy.sh"
+          scp: |
+            ./ => "/home/azureuser/eew-bot/"
+          last_ssh: |
+            sh deploy.sh
