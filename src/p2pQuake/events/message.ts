@@ -2,7 +2,7 @@ import { MessageEmbedOptions } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
-import { JMAIntensity } from "../typings/scale";
+import { JMAColors, JMAIntensity } from "../typings/scale";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
 import { parseDate } from "./../../util/util";
 
@@ -72,7 +72,8 @@ export default new Event("message", async (data) => {
             timestamp: Date.now(),
             image: {
                 url: `https://www.p2pquake.net/app/images/${json["_id"]}_trim_big.png`
-            }
+            },
+            color: JMAColors[json.earthquake.maxScale.toString()]
         };
     } else {
         embed = {
