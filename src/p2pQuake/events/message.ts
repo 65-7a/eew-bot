@@ -1,9 +1,10 @@
-import { MessageEmbed } from "discord.js";
+import { MessageAttachment, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
 import { parseDate } from "./../../util/util";
+import axios from "axios";
 
 /**
  * 551: JMAQuake (earthquake information)
@@ -20,8 +21,26 @@ export default new Event("message", async (data) => {
     logger.verbose(json);
 
     const embed = new MessageEmbed();
+    const attachments: MessageAttachment[] = [];
 
     if (json.code === 551) {
+        const time = parseDate(json.earthquake.time);
+
+        attachments.push(
+            new MessageAttachment(
+                Buffer.from(
+                    (
+                        await axios.get(
+                            `https://www.p2pquake.net/app/images/${json["_id"]}_trim_big.png`,
+                            { responseType: "arraybuffer" }
+                        )
+                    ).data,
+                    "binary"
+                ),
+                time.toISO()
+            )
+        );
+
         embed
             .setTitle("Earthquake Information")
             .addField(
@@ -48,9 +67,7 @@ export default new Event("message", async (data) => {
             .addField("Foreign Tsunami", json.earthquake.foreignTsunami, true)
             .addField(
                 "Time",
-                parseDate(json.earthquake.time).toLocaleString(
-                    DateTime.DATETIME_FULL_WITH_SECONDS
-                )
+                time.toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)
             )
             .setDescription(
                 `Issued by ${json.issue.source} at ${parseDate(
@@ -58,9 +75,7 @@ export default new Event("message", async (data) => {
                 ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`
             )
             .setTimestamp()
-            .setImage(
-                `https://www.p2pquake.net/app/images/${json["_id"]}_trim_big.png`
-            );
+            .setImage(`attachment://${time.toISO()}`);
     } else {
         embed.addFields(
             Object.entries(json).map(([k, v]) => {
@@ -78,7 +93,8 @@ export default new Event("message", async (data) => {
         if (channel.isText()) {
             try {
                 await channel.send({
-                    embeds: [embed]
+                    embeds: [embed],
+                    attachments: attachments
                 });
             } catch (e) {
                 logger.error(e);
