@@ -43,6 +43,11 @@ export const winstonConfig: winston.LoggerOptions = {
     levels: customLevels.levels,
     transports: [
         new winston.transports.File({
+            filename: `logs/verbose.log`,
+            level: "verbose",
+            handleExceptions: true
+        }),
+        new winston.transports.File({
             filename: `logs/combined.log`,
             level: "success",
             handleExceptions: true

@@ -71,10 +71,14 @@ export default new Event("message", async (data) => {
             },
             timestamp: Date.now(),
             image: {
-                url: `https://www.p2pquake.net/app/images/${json["_id"]}_trim_big.png`
+                url: `https://www.p2pquake.net/app/images/${json.id}_trim_big.png`
             },
             color: JMAColors[json.earthquake.maxScale.toString()]
         };
+
+        logger.debug(
+            `https://www.p2pquake.net/app/images/${json.id}_trim_big.png`
+        );
     } else {
         embed = {
             fields: Object.entries(json).map(([k, v]) => {
