@@ -77,10 +77,6 @@ export default new Event("message", async (data) => {
             },
             color: JMAColors[json.earthquake.maxScale.toString()]
         };
-
-        logger.verbose(
-            `https://www.p2pquake.net/app/images/${id}_trim_big.png`
-        );
     } else {
         embed = {
             fields: Object.entries(json).map(([k, v]) => {
@@ -97,9 +93,13 @@ export default new Event("message", async (data) => {
         const channel = client.channels.cache.get(ch.id);
         if (channel.isText()) {
             try {
-                await channel.send({
+                const message = await channel.send({
                     embeds: [embed]
                 });
+
+                message.embeds[0].image;
+
+                logger.verbose(message.embeds[0].image);
             } catch (e) {
                 logger.error(e);
             }
