@@ -25,7 +25,7 @@ jobs:
           ARGS: "-rltgoDzvO --delete"
           SOURCE: "./"
           TARGET: "/home/${{secrets.REMOTE_USER}}/eew-bot/"
-          EXCLUDE: "/node_modules/, /.git/"
+          EXCLUDE: "/node_modules/"
       - name: Execute remote ssh commands
         uses: appleboy/ssh-action@master
         with:
