@@ -1,5 +1,7 @@
 import { DateTime } from "luxon";
 
+export const waitMS = (ms) => new Promise((res) => setTimeout(res, ms));
+
 export function parseDate(date: string, milliseconds = false) {
     return DateTime.fromFormat(
         date,

@@ -1,11 +1,11 @@
 import axios from "axios";
-import { MessageEmbedOptions } from "discord.js";
+import { MessageEmbed, MessageEmbedOptions } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
 import { JMAColors, JMAIntensity } from "../typings/scale";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
-import { parseDate } from "./../../util/util";
+import { parseDate, waitMS } from "./../../util/util";
 
 /**
  * 551: JMAQuake (earthquake information)
@@ -22,6 +22,7 @@ export default new Event("message", async (data) => {
     if (json.code !== 551) return;
 
     const id = json.id || json["_id"];
+    const imageUrl = `https://www.p2pquake.net/app/images/${id}_trim_big.png`;
 
     const embed: MessageEmbedOptions = {
         title: "Earthquake Information",
@@ -82,19 +83,29 @@ export default new Event("message", async (data) => {
                     embeds: [embed]
                 });
 
-                try {
-                    const response = await axios.get(
-                        `https://www.p2pquake.net/app/images/${id}_trim_big.png`
-                    );
+                const waitForImage = async () => {
+                    await waitMS(5000);
 
-                    logger.info(response.status);
-                } catch (e) {
-                    if (axios.isAxiosError(e)) {
-                        logger.info(e.response.status);
-                    } else {
-                        logger.error(e);
+                    try {
+                        const response = await axios.get(imageUrl);
+
+                        if (response.status === 200) {
+                            await message.edit({
+                                embeds: [
+                                    new MessageEmbed(embed).setImage(imageUrl)
+                                ]
+                            });
+                        }
+                    } catch (e) {
+                        if (!axios.isAxiosError(e)) return logger.error(e);
+
+                        if (e.response.status === 404) {
+                            return waitForImage();
+                        }
                     }
-                }
+                };
+
+                waitForImage();
 
                 logger.debug(message.embeds[0].image);
             } catch (e) {
