@@ -1,3 +1,4 @@
+import axios from "axios";
 import { MessageEmbedOptions } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
@@ -17,76 +18,60 @@ import { parseDate } from "./../../util/util";
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString());
     if (json.code === 555 || json.code === 561 || json.code === 9611) return;
-
     logger.verbose(json);
+    if (json.code !== 551) return;
 
-    let embed: MessageEmbedOptions;
+    const id = json.id || json["_id"];
 
-    if (json.code === 551) {
-        const id = json.id || json["_id"];
-
-        embed = {
-            title: "Earthquake Information",
-            fields: [
-                {
-                    name: "Hypocenter",
-                    value: `${json.earthquake.hypocenter.name} (${json.earthquake.hypocenter.latitude}, ${json.earthquake.hypocenter.longitude})`,
-                    inline: true
-                },
-                {
-                    name: "Magnitude",
-                    value: json.earthquake.hypocenter.magnitude.toString(),
-                    inline: true
-                },
-                {
-                    name: "Depth",
-                    value: json.earthquake.hypocenter.depth.toString() + " km",
-                    inline: true
-                },
-                {
-                    name: "Maximum Intensity",
-                    value: JMAIntensity[json.earthquake.maxScale.toString()],
-                    inline: true
-                },
-                {
-                    name: "Tsunami",
-                    value: json.earthquake.domesticTsunami,
-                    inline: true
-                },
-                {
-                    name: "Foreign Tsunami",
-                    value: json.earthquake.foreignTsunami,
-                    inline: true
-                },
-                {
-                    name: "Time",
-                    value: parseDate(json.earthquake.time).toLocaleString(
-                        DateTime.DATETIME_FULL_WITH_SECONDS
-                    )
-                }
-            ],
-            description: `Issued by ${json.issue.source} at ${parseDate(
-                json.issue.time
-            ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`,
-            footer: {
-                text: "Source: Japan Meteorological Agency"
+    const embed: MessageEmbedOptions = {
+        title: "Earthquake Information",
+        fields: [
+            {
+                name: "Hypocenter",
+                value: `${json.earthquake.hypocenter.name} (${json.earthquake.hypocenter.latitude}, ${json.earthquake.hypocenter.longitude})`,
+                inline: true
             },
-            timestamp: Date.now(),
-            image: {
-                url: `https://www.p2pquake.net/app/images/${id}_trim_big.png`
+            {
+                name: "Magnitude",
+                value: json.earthquake.hypocenter.magnitude.toString(),
+                inline: true
             },
-            color: JMAColors[json.earthquake.maxScale.toString()]
-        };
-    } else {
-        embed = {
-            fields: Object.entries(json).map(([k, v]) => {
-                return {
-                    name: k,
-                    value: v?.toString() || "null"
-                };
-            })
-        };
-    }
+            {
+                name: "Depth",
+                value: json.earthquake.hypocenter.depth.toString() + " km",
+                inline: true
+            },
+            {
+                name: "Maximum Intensity",
+                value: JMAIntensity[json.earthquake.maxScale.toString()],
+                inline: true
+            },
+            {
+                name: "Tsunami",
+                value: json.earthquake.domesticTsunami,
+                inline: true
+            },
+            {
+                name: "Foreign Tsunami",
+                value: json.earthquake.foreignTsunami,
+                inline: true
+            },
+            {
+                name: "Time",
+                value: parseDate(json.earthquake.time).toLocaleString(
+                    DateTime.DATETIME_FULL_WITH_SECONDS
+                )
+            }
+        ],
+        description: `Issued by ${json.issue.source} at ${parseDate(
+            json.issue.time
+        ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`,
+        footer: {
+            text: "Source: Japan Meteorological Agency"
+        },
+        timestamp: Date.now(),
+        color: JMAColors[json.earthquake.maxScale.toString()]
+    };
 
     const channels = await SubscribedChannel.find({}).exec();
     channels.forEach(async (ch) => {
@@ -97,9 +82,21 @@ export default new Event("message", async (data) => {
                     embeds: [embed]
                 });
 
-                message.embeds[0].image;
+                try {
+                    const response = await axios.get(
+                        `https://www.p2pquake.net/app/images/${id}_trim_big.png`
+                    );
 
-                logger.verbose(message.embeds[0].image);
+                    logger.info(response.status);
+                } catch (e) {
+                    if (axios.isAxiosError(e)) {
+                        logger.info(e.response.status);
+                    } else {
+                        logger.error(e);
+                    }
+                }
+
+                logger.debug(message.embeds[0].image);
             } catch (e) {
                 logger.error(e);
             }
