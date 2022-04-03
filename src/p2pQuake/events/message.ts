@@ -76,7 +76,7 @@ export default new Event("message", async (data) => {
 
     const channels = await SubscribedChannel.find({}).exec();
     channels.forEach(async (ch) => {
-        const channel = client.channels.cache.get(ch.id);
+        const channel = await client.channels.fetch(ch.id);
         if (channel.isText()) {
             try {
                 const message = await channel.send({
