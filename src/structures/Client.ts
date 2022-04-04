@@ -10,7 +10,7 @@ import glob from "glob-promise";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
 import { importFile } from "../util/util";
-import { logger, p2pQuake } from "..";
+import { logger } from "..";
 import mongoose from "mongoose";
 
 export class ExtendedClient extends Client {
