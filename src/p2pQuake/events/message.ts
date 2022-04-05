@@ -168,27 +168,24 @@ export default new Event("message", async (data) => {
                     embeds: [embed]
                 });
 
-                const waitForImage = async () => {
-                    await waitMS(5000);
-
+                let tries = 0;
+                while (tries < 12) {
                     try {
                         const response = await axios.get(imageUrl);
-
                         if (response.status === 200) {
                             await message.edit({
                                 embeds: [embed.setImage(imageUrl)]
                             });
-                        }
-                    } catch (e) {
-                        if (!axios.isAxiosError(e)) return logger.error(e);
 
-                        if (e.response.status === 404) {
-                            return waitForImage();
+                            break;
                         }
+                    } catch (err) {
+                        if (!axios.isAxiosError(err)) return logger.error(err);
+
+                        await waitMS(5000);
+                        tries++;
                     }
-                };
-
-                waitForImage();
+                }
             } catch (e) {
                 logger.error(e);
             }
