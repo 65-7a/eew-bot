@@ -20,5 +20,7 @@ export class P2PQuakeClient {
 
             this.ws.on(event.event, event.run);
         });
+
+        // this.ws.emit("message", (await (await import("fs/promises")).readFile("data.txt")).toString());
     }
 }

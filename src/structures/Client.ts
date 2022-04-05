@@ -65,7 +65,15 @@ export class ExtendedClient extends Client {
         eventFiles.forEach(async (filePath) => {
             const event: Event<keyof ClientEvents> = await importFile(filePath);
 
-            this.on(event.event, event.run as never);
+            this.on(event.event, (...args) => {
+                try {
+                    event.run(...args);
+                } catch (err) {
+                    logger.error(
+                        `An error occurred while handling Discord event ${event.event}: ${err}`
+                    );
+                }
+            });
         });
     }
 }
