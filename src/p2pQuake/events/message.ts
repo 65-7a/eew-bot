@@ -124,7 +124,11 @@ async function handleData(data: WebSocketData) {
                         .addFields([
                             {
                                 name: "Hypocenter",
-                                value: `${data.earthquake.hypocenter.name} (${data.earthquake.hypocenter.latitude}, ${data.earthquake.hypocenter.longitude})`,
+                                value: `${
+                                    areaNames[data.earthquake.hypocenter.name]
+                                } (${data.earthquake.hypocenter.latitude}, ${
+                                    data.earthquake.hypocenter.longitude
+                                })`,
                                 inline: true
                             },
                             {
