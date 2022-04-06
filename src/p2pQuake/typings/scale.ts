@@ -1,6 +1,6 @@
 import { ColorResolvable } from "discord.js";
 
-export const JMAIntensity: Record<string, string> = {
+export const jmaIntensity: Record<string, string> = {
     "-1": "None",
     "10": "1",
     "20": "2",
@@ -14,7 +14,7 @@ export const JMAIntensity: Record<string, string> = {
     "70": "7"
 };
 
-export const JMAColors: Record<string, ColorResolvable> = {
+export const jmaColors: Record<string, ColorResolvable> = {
     "-1": "DEFAULT",
     "10": "#ececec",
     "20": "#0097ff",

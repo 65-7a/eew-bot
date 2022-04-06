@@ -3,7 +3,8 @@ import { MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
-import { JMAColors, JMAIntensity } from "../typings/scale";
+import { areaNames } from "../typings/areas";
+import { jmaColors, jmaIntensity } from "../typings/scale";
 import { WebSocketData } from "../typings/schemas";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
 import { groupBy, parseDate, waitMS } from "./../../util/util";
@@ -31,7 +32,7 @@ async function handleData(data: WebSocketData) {
                         )
                     }
                 ],
-                description: `Issued by ${data.issue.source} at ${parseDate(
+                description: `Issued at ${parseDate(
                     data.issue.time
                 ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`,
                 footer: {
@@ -49,7 +50,7 @@ async function handleData(data: WebSocketData) {
                         )
                         .addField(
                             "Maximum Intensity",
-                            JMAIntensity[data.earthquake.maxScale.toString()],
+                            jmaIntensity[data.earthquake.maxScale.toString()],
                             true
                         )
                         .addFields(
@@ -57,9 +58,9 @@ async function handleData(data: WebSocketData) {
                                 groupBy(data.points, (p) => p.scale.toString())
                             ).map(([scale, points]) => {
                                 return {
-                                    name: `Intensity ${JMAIntensity[scale]}`,
+                                    name: `Intensity ${jmaIntensity[scale]}`,
                                     value: points
-                                        .map((point) => point.addr)
+                                        .map((point) => areaNames[point.addr])
                                         .join("\n"),
                                     inline: true
                                 };
@@ -75,8 +76,12 @@ async function handleData(data: WebSocketData) {
                         .setTitle("Earthquake Epicenter Information")
                         .addFields([
                             {
-                                name: "Hypocenter",
-                                value: `${data.earthquake.hypocenter.name} (${data.earthquake.hypocenter.latitude}, ${data.earthquake.hypocenter.longitude})`,
+                                name: "Epicenter",
+                                value: `${
+                                    areaNames[data.earthquake.hypocenter.name]
+                                } (${data.earthquake.hypocenter.latitude}, ${
+                                    data.earthquake.hypocenter.longitude
+                                })`,
                                 inline: true
                             },
                             {
@@ -136,7 +141,7 @@ async function handleData(data: WebSocketData) {
                             },
                             {
                                 name: "Maximum Intensity",
-                                value: JMAIntensity[
+                                value: jmaIntensity[
                                     data.earthquake.maxScale.toString()
                                 ],
                                 inline: true
@@ -153,7 +158,7 @@ async function handleData(data: WebSocketData) {
                             }
                         ])
                         .setColor(
-                            JMAColors[data.earthquake.maxScale.toString()]
+                            jmaColors[data.earthquake.maxScale.toString()]
                         );
                 }
             }
