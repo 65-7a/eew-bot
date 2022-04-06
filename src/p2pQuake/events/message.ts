@@ -6,7 +6,7 @@ import { Event } from "../structures/Event";
 import { areaNames } from "../typings/areas";
 import { jmaColors, jmaIntensity } from "../typings/scale";
 import { WebSocketData } from "../typings/schemas";
-import { SubscribedChannel } from "./../../models/subscribedChannel";
+import { RegisteredChannel } from "../../models/registeredChannel";
 import { groupBy, parseDate, waitMS } from "./../../util/util";
 
 export default new Event("message", async (data) => {
@@ -32,7 +32,7 @@ async function handleData(data: WebSocketData) {
                         )
                     }
                 ],
-                description: `Issued at ${parseDate(
+                description: `Issued on ${parseDate(
                     data.issue.time
                 ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}`,
                 footer: {
@@ -163,32 +163,32 @@ async function handleData(data: WebSocketData) {
                 }
             }
 
-            const channels = await SubscribedChannel.find({}).exec();
+            const channels = await RegisteredChannel.find({}).exec();
             channels.forEach(async (ch) => {
-                const channel = await client.channels.fetch(ch.id);
-                if (channel.isText()) {
-                    const message = await channel.send({
-                        embeds: [embed]
-                    });
+                const channel = client.channels.cache.get(ch.id);
+                if (!channel || !channel.isText())
+                    return RegisteredChannel.deleteOne({ id: ch.id });
 
-                    let tries = 0;
-                    while (tries < 6) {
-                        try {
-                            const response = await axios.get(imageUrl);
-                            if (response.status === 200) {
-                                await message.edit({
-                                    embeds: [embed.setImage(imageUrl)]
-                                });
+                const message = await channel.send({
+                    embeds: [embed]
+                });
 
-                                break;
-                            }
-                        } catch (err) {
-                            logger.error(err);
-                            if (!axios.isAxiosError(err)) return;
+                let tries = 0;
+                while (tries < 6) {
+                    try {
+                        const response = await axios.get(imageUrl);
+                        if (response.status === 200) {
+                            await message.edit({
+                                embeds: [embed.setImage(imageUrl)]
+                            });
 
-                            await waitMS(5000);
-                            tries++;
+                            break;
                         }
+                    } catch (err) {
+                        if (!axios.isAxiosError(err)) return logger.error(err);
+
+                        await waitMS(5000);
+                        tries++;
                     }
                 }
             });

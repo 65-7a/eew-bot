@@ -26,7 +26,7 @@ export class ExtendedClient extends Client {
     }
 
     async start() {
-        await mongoose.connect("mongodb://localhost:27017/test");
+        await mongoose.connect("mongodb://localhost:27017/eew-bot");
         await this.registerModules();
         await this.login(process.env.BOT_TOKEN);
     }

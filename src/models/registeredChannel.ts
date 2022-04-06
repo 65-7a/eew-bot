@@ -11,4 +11,4 @@ const schema = new mongoose.Schema({
     }
 });
 
-export const SubscribedChannel = mongoose.model("Channel", schema);
+export const RegisteredChannel = mongoose.model("Channel", schema);

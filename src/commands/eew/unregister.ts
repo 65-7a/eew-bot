@@ -1,4 +1,4 @@
-import { SubscribedChannel } from "../../models/subscribedChannel";
+import { RegisteredChannel } from "../../models/registeredChannel";
 import { Command } from "../../structures/Command";
 
 export default new Command({
@@ -16,13 +16,12 @@ export default new Command({
     run: async ({ interaction, args }) => {
         const channelMention = args.getChannel("channel", true);
 
-        if (!(await SubscribedChannel.exists({ id: channelMention.id }).exec()))
+        if (!(await RegisteredChannel.exists({ id: channelMention.id }).exec()))
             return await interaction.followUp(
-                "This channel is not subscribed!"
+                "This channel is not registered!"
             );
 
-        await SubscribedChannel.deleteOne({ id: channelMention.id }).exec();
-
+        await RegisteredChannel.deleteOne({ id: channelMention.id }).exec();
         await interaction.followUp(
             `Successfully unregistered. ${channelMention} will no longer receive earthquake notifications.`
         );
