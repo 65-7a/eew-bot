@@ -30,9 +30,11 @@ export default new Command({
             return interaction.followUp("That channel isn't a text channel!");
 
         if (!interaction.member.permissionsIn(channel).has("MANAGE_CHANNELS"))
-            return interaction.followUp(
-                "You need the `MANAGE_CHANNELS` permission in that channel for this command!"
-            );
+            return interaction.followUp({
+                content:
+                    "You need the `MANAGE_CHANNELS` permission in that channel for this command!",
+                ephemeral: true
+            });
 
         new RegisteredChannel({
             id: channel.id,

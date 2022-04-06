@@ -16,9 +16,24 @@ export default new Command({
     run: async ({ interaction, args }) => {
         const channelMention = args.getChannel("channel", true);
 
+        const channel = interaction.guild.channels.cache.get(channelMention.id);
+
+        if (!channel)
+            return await interaction.followUp("I cannot access that channel!");
+
+        if (!channel.isText())
+            return interaction.followUp("That channel isn't a text channel!");
+
+        if (!interaction.member.permissionsIn(channel).has("MANAGE_CHANNELS"))
+            return interaction.followUp({
+                content:
+                    "You need the `MANAGE_CHANNELS` permission in that channel for this command!",
+                ephemeral: true
+            });
+
         if (!(await RegisteredChannel.exists({ id: channelMention.id }).exec()))
             return await interaction.followUp(
-                "This channel is not registered!"
+                "That channel is not registered!"
             );
 
         await RegisteredChannel.deleteOne({ id: channelMention.id }).exec();
