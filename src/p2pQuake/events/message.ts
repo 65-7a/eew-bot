@@ -4,34 +4,22 @@ import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
 import { JMAColors, JMAIntensity } from "../typings/scale";
+import { WebSocketData } from "../typings/schemas";
 import { SubscribedChannel } from "./../../models/subscribedChannel";
 import { groupBy, parseDate, waitMS } from "./../../util/util";
 
-/**
- * 551: JMAQuake (earthquake information)
- * 552: JMATsunami (tsunami forecast)
- * 554: EEWDetection (eew announcement detection)
- * 555: AreaPeers (number of peers (sensors) in each region)
- * 561: UserQuake (earthquake detection information)
- * 9611: UserQuakeEvaluation (earthquake detection information evaluation result)
- */
 export default new Event("message", async (data) => {
-    const json = JSON.parse(data.toString());
-
-    if (Array.isArray(json)) {
-        json.forEach((data) => handleData(data));
-    } else {
-        handleData(json);
-    }
-});
-
-async function handleData(data: Record<string, any>) {
-    if (data.code === 555 || data.code === 561 || data.code === 9611) return;
+    const json = JSON.parse(data.toString()) as WebSocketData;
+    if (json.code === 555 || json.code === 561 || json.code === 9611) return;
     logger.verbose(data);
 
+    handleData(json);
+});
+
+async function handleData(data: WebSocketData) {
     switch (data.code) {
         case 551: {
-            const id = data.id || data["_id"];
+            const id = data.id || data._id;
             const imageUrl = `https://www.p2pquake.net/app/images/${id}_trim_big.png`;
 
             const embed = new MessageEmbed({
@@ -66,12 +54,7 @@ async function handleData(data: Record<string, any>) {
                         )
                         .addFields(
                             Object.entries(
-                                groupBy<{
-                                    addr: string;
-                                    isArea: boolean;
-                                    pref: string;
-                                    scale: number;
-                                }>(data.points, (p) => p.scale.toString())
+                                groupBy(data.points, (p) => p.scale.toString())
                             ).map(([scale, points]) => {
                                 return {
                                     name: `Intensity ${JMAIntensity[scale]}`,
@@ -184,7 +167,7 @@ async function handleData(data: Record<string, any>) {
                     });
 
                     let tries = 0;
-                    while (tries < 12) {
+                    while (tries < 6) {
                         try {
                             const response = await axios.get(imageUrl);
                             if (response.status === 200) {
