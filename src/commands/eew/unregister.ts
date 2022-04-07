@@ -13,6 +13,7 @@ export default new Command({
             required: true
         }
     ],
+    guildOnly: true,
     run: async ({ interaction, args }) => {
         const channelMention = args.getChannel("channel", true);
 

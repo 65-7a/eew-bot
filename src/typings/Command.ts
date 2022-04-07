@@ -21,6 +21,6 @@ type RunFunction = (options: RunOptions) => unknown;
 
 export type CommandType = {
     userPermissions?: PermissionResolvable[];
-    // TODO: add stuff here
+    guildOnly: boolean;
     run: RunFunction;
 } & ChatInputApplicationCommandData;
