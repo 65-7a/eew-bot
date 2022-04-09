@@ -4,6 +4,7 @@ import { Command } from "../../structures/Command";
 export default new Command({
     name: "getregistered",
     description: "Get all registered channels in the current guild",
+    guildOnly: true,
     run: async ({ interaction }) => {
         const registered = await RegisteredChannel.find({
             guildId: interaction.guildId
@@ -14,6 +15,12 @@ export default new Command({
                 await RegisteredChannel.deleteOne({ id: c.id }).exec();
                 registered.splice(registered.indexOf(c.id), 1);
             });
+        }
+
+        if (!interaction.guild) {
+            return await interaction.followUp(
+                "This command should only be run in a guild!"
+            );
         }
 
         await interaction.followUp(

@@ -8,9 +8,15 @@ export default new Event("interactionCreate", async (interaction) => {
         await interaction.deferReply();
         const command = client.commands.get(interaction.commandName);
         if (!command)
-            return interaction.followUp("This command does not exist!");
+            return await interaction.followUp("This command does not exist!");
 
         try {
+            if (command.guildOnly && !interaction.inGuild()) {
+                return await interaction.followUp(
+                    "This command can only be run in a guild!"
+                );
+            }
+
             command.run({
                 args: interaction.options as CommandInteractionOptionResolver,
                 client,
