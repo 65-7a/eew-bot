@@ -3,7 +3,7 @@ import { MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
 import { client, logger } from "../..";
 import { Event } from "../structures/Event";
-import { areaNames } from "../typings/areas";
+import { areaNames, hypocenterNames } from "../typings/areas";
 import { jmaColors, jmaIntensity } from "../typings/scale";
 import { WebSocketData } from "../typings/schemas";
 import { RegisteredChannel } from "../../models/registeredChannel";
@@ -12,7 +12,7 @@ import { groupBy, parseDate, waitMS } from "./../../util/util";
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString()) as WebSocketData;
     if (json.code === 555 || json.code === 561 || json.code === 9611) return;
-    logger.verbose(data);
+    logger.verbose(json);
 
     handleData(json);
 });
@@ -60,7 +60,12 @@ async function handleData(data: WebSocketData) {
                                 return {
                                     name: `Intensity ${jmaIntensity[scale]}`,
                                     value: points
-                                        .map((point) => areaNames[point.addr])
+                                        .map(
+                                            (point) =>
+                                                hypocenterNames[point.pref] ??
+                                                areaNames[point.pref] ??
+                                                point.pref
+                                        )
                                         .join("\n"),
                                     inline: true
                                 };
@@ -78,7 +83,9 @@ async function handleData(data: WebSocketData) {
                             {
                                 name: "Epicenter",
                                 value: `${
-                                    areaNames[data.earthquake.hypocenter.name]
+                                    hypocenterNames[
+                                        data.earthquake.hypocenter.name
+                                    ]
                                 } (${data.earthquake.hypocenter.latitude}, ${
                                     data.earthquake.hypocenter.longitude
                                 })`,
@@ -125,7 +132,9 @@ async function handleData(data: WebSocketData) {
                             {
                                 name: "Hypocenter",
                                 value: `${
-                                    areaNames[data.earthquake.hypocenter.name]
+                                    hypocenterNames[
+                                        data.earthquake.hypocenter.name
+                                    ]
                                 } (${data.earthquake.hypocenter.latitude}, ${
                                     data.earthquake.hypocenter.longitude
                                 })`,
@@ -173,27 +182,32 @@ async function handleData(data: WebSocketData) {
                 if (!channel || !channel.isText())
                     return RegisteredChannel.deleteOne({ id: ch.id });
 
-                const message = await channel.send({
-                    embeds: [embed]
-                });
+                try {
+                    const message = await channel.send({
+                        embeds: [embed]
+                    });
 
-                let tries = 0;
-                while (tries < 6) {
-                    try {
-                        const response = await axios.get(imageUrl);
-                        if (response.status === 200) {
-                            await message.edit({
-                                embeds: [embed.setImage(imageUrl)]
-                            });
+                    let tries = 0;
+                    while (tries < 6) {
+                        try {
+                            const response = await axios.get(imageUrl);
+                            if (response.status === 200) {
+                                await message.edit({
+                                    embeds: [embed.setImage(imageUrl)]
+                                });
 
-                            break;
+                                break;
+                            }
+                        } catch (err) {
+                            if (!axios.isAxiosError(err))
+                                return logger.error(err);
+
+                            await waitMS(5000);
+                            tries++;
                         }
-                    } catch (err) {
-                        if (!axios.isAxiosError(err)) return logger.error(err);
-
-                        await waitMS(5000);
-                        tries++;
                     }
+                } catch (err) {
+                    logger.error(err + embed);
                 }
             });
         }
