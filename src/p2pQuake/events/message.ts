@@ -8,6 +8,8 @@ import { jmaColors, jmaIntensity } from "../typings/scale";
 import { WebSocketData } from "../typings/schemas";
 import { RegisteredChannel } from "../../models/registeredChannel";
 import { groupBy, parseDate, waitMS } from "./../../util/util";
+import m3u8stream from "m3u8stream";
+import fs from "fs";
 
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString()) as WebSocketData;
@@ -210,6 +212,22 @@ async function handleData(data: WebSocketData) {
                     logger.error(err + embed);
                 }
             });
+
+            break;
+        }
+
+        case 554: {
+            const stream = m3u8stream("https://nhk2.mov3.co/hls/nhk.m3u8");
+
+            stream.pipe(
+                fs.createWriteStream(
+                    `record/${data.time.replace(/\/|:|\.| /gm, "")}.mp4`
+                )
+            );
+
+            await waitMS(1800000);
+
+            stream.end();
         }
     }
 }
