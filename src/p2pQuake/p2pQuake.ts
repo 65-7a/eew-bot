@@ -1,6 +1,6 @@
 import glob from "glob-promise";
 import { WebSocket } from "ws";
-import { importFile } from "../util/util";
+import { importFile } from "../shared/util";
 import { BaseWSClientEvents, Event } from "./structures/Event";
 
 export class P2PQuakeClient {

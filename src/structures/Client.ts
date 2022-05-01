@@ -9,7 +9,7 @@ import { CommandType } from "../typings/Command";
 import glob from "glob-promise";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
-import { importFile } from "../util/util";
+import { importFile } from "../shared/util";
 import { logger } from "..";
 import mongoose from "mongoose";
 

@@ -1,5 +1,5 @@
 import { logger, p2pQuake } from "../..";
-import { waitMS } from "../../util/util";
+import { waitMS } from "../../shared/util";
 import { Event } from "../structures/Event";
 
 export default new Event("close", async (code, reason) => {

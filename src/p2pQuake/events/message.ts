@@ -7,9 +7,10 @@ import { areaNames, hypocenterNames } from "../typings/areas";
 import { jmaColors, jmaIntensity } from "../typings/scale";
 import { WebSocketData } from "../typings/schemas";
 import { RegisteredChannel } from "../../models/registeredChannel";
-import { groupBy, parseDate, waitMS } from "./../../util/util";
+import { groupBy, parseDate, waitMS } from "../../shared/util";
 import m3u8stream from "m3u8stream";
 import fs from "fs";
+import { uploadVideo } from "../../shared/google";
 
 export default new Event("message", async (data) => {
     const json = JSON.parse(data.toString()) as WebSocketData;
@@ -218,16 +219,28 @@ async function handleData(data: WebSocketData) {
 
         case 554: {
             const stream = m3u8stream("https://nhk2.mov3.co/hls/nhk.m3u8");
+            const path = `record/${data.time.replace(/\/|:|\.| /gm, "")}.mp4`;
 
-            stream.pipe(
-                fs.createWriteStream(
-                    `record/${data.time.replace(/\/|:|\.| /gm, "")}.mp4`
-                )
-            );
-
+            stream.pipe(fs.createWriteStream(path));
             await waitMS(1800000);
-
             stream.end();
+
+            try {
+                const videoData = await uploadVideo(
+                    `EEW ${data.time}`,
+                    "",
+                    [],
+                    "ja",
+                    "private",
+                    fs.createReadStream(path)
+                );
+
+                logger.info(
+                    `Video uploaded to https://www.youtube.com/watch?v=${videoData.id}`
+                );
+            } catch (error) {
+                logger.error(error);
+            }
         }
     }
 }
