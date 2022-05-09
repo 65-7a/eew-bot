@@ -4,6 +4,7 @@ import dedent from "dedent";
 import { client } from "../..";
 import { RegisteredChannel } from "../../models/registeredChannel";
 import { Duration } from "luxon";
+import { toHuman } from "../../util/util";
 
 export default new Command({
     name: "about",
@@ -38,9 +39,12 @@ export default new Command({
                         },
                         {
                             name: "Uptime",
-                            value: Duration.fromMillis(
-                                process.uptime() * 1000
-                            ).toHuman({ unitDisplay: "short" }),
+                            value: toHuman(
+                                Duration.fromMillis(process.uptime() * 1000),
+                                {
+                                    unitDisplay: "short"
+                                }
+                            ),
                             inline: true
                         }
                     ],
