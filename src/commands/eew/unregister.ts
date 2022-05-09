@@ -20,25 +20,23 @@ export default new Command({
         const channel = interaction.guild.channels.cache.get(channelMention.id);
 
         if (!channel)
-            return await interaction.followUp("I cannot access that channel!");
+            return await interaction.reply("I cannot access that channel!");
 
         if (!channel.isText())
-            return interaction.followUp("That channel isn't a text channel!");
+            return interaction.reply("That channel isn't a text channel!");
 
         if (!interaction.member.permissionsIn(channel).has("MANAGE_CHANNELS"))
-            return interaction.followUp({
+            return interaction.reply({
                 content:
                     "You need the `MANAGE_CHANNELS` permission in that channel for this command!",
                 ephemeral: true
             });
 
         if (!(await RegisteredChannel.exists({ id: channelMention.id }).exec()))
-            return await interaction.followUp(
-                "That channel is not registered!"
-            );
+            return await interaction.reply("That channel is not registered!");
 
         await RegisteredChannel.deleteOne({ id: channelMention.id }).exec();
-        await interaction.followUp(
+        await interaction.reply(
             `Successfully unregistered. ${channelMention} will no longer receive earthquake notifications.`
         );
     }

@@ -18,20 +18,20 @@ export default new Command({
         const channelMention = args.getChannel("channel", true);
 
         if (await RegisteredChannel.exists({ id: channelMention.id }).exec())
-            return await interaction.followUp(
+            return await interaction.reply(
                 "This channel is already registered!"
             );
 
         const channel = interaction.guild.channels.cache.get(channelMention.id);
 
         if (!channel)
-            return await interaction.followUp("I cannot access that channel!");
+            return await interaction.reply("I cannot access that channel!");
 
         if (!channel.isText())
-            return interaction.followUp("That channel isn't a text channel!");
+            return interaction.reply("That channel isn't a text channel!");
 
         if (!interaction.member.permissionsIn(channel).has("MANAGE_CHANNELS"))
-            return interaction.followUp({
+            return interaction.reply({
                 content:
                     "You need the `MANAGE_CHANNELS` permission in that channel for this command!",
                 ephemeral: true
@@ -42,7 +42,7 @@ export default new Command({
             guildId: interaction.guildId
         }).save();
 
-        await interaction.followUp(
+        await interaction.reply(
             `Successfully registered. ${channelMention} will now receive earthquake notifications.`
         );
     }

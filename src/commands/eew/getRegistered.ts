@@ -18,12 +18,12 @@ export default new Command({
         }
 
         if (!interaction.guild) {
-            return await interaction.followUp(
+            return await interaction.reply(
                 "This command should only be run in a guild!"
             );
         }
 
-        await interaction.followUp(
+        await interaction.reply(
             `Registered channels in ${interaction.guild.name}:\n\n${registered
                 .map((c) => `<#${c.id}>`)
                 .join(", ")}`
