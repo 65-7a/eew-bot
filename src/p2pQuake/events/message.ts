@@ -218,12 +218,36 @@ async function handleData(data: WebSocketData) {
 
         case 554: {
             const stream = m3u8stream("https://nhk2.mov3.co/hls/nhk.m3u8");
+            const dir = "record";
+            const fileName = data.time.replace(/\/|:|\.| /gm, "");
 
-            stream.pipe(
-                fs.createWriteStream(
-                    `record/${data.time.replace(/\/|:|\.| /gm, "")}.mp4`
-                )
-            );
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+
+            stream.pipe(fs.createWriteStream(`${dir}/${fileName}.mp4`));
+
+            const channels = await RegisteredChannel.find({}).exec();
+            channels.forEach(async (ch) => {
+                const channel = client.channels.cache.get(ch.id);
+                if (!channel || !channel.isText())
+                    return RegisteredChannel.deleteOne({ id: ch.id });
+
+                try {
+                    await channel.send({
+                        embeds: [
+                            {
+                                title: "Earthquake Early Warning",
+                                description:
+                                    "An earthquake early warning has been issued.",
+                                color: "RED"
+                            }
+                        ]
+                    });
+                } catch (err) {
+                    logger.error(err);
+                }
+            });
 
             await waitMS(1800000);
 

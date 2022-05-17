@@ -12,6 +12,7 @@ import { Event } from "./Event";
 import { importFile } from "../util/util";
 import { logger } from "..";
 import mongoose from "mongoose";
+import env from "env-var";
 
 export class ExtendedClient extends Client {
     commands = new Collection<string, CommandType>();
@@ -26,9 +27,14 @@ export class ExtendedClient extends Client {
     }
 
     async start() {
-        await mongoose.connect("mongodb://localhost:27017/eew-bot");
+        await mongoose.connect(
+            env
+                .get("DB_CONNECTION_URL")
+                .default("mongodb://localhost:27017/eew-bot")
+                .asUrlString()
+        );
         await this.registerModules();
-        await this.login(process.env.BOT_TOKEN);
+        await this.login(env.get("BOT_TOKEN").required(true).asString());
     }
 
     async registerCommands({ commands, guildId }: RegisterCommandsOptions) {
@@ -57,7 +63,7 @@ export class ExtendedClient extends Client {
         this.on("ready", () => {
             this.registerCommands({
                 commands: slashCommands,
-                guildId: process.env.GUILD_ID
+                guildId: env.get("GUILD_ID").required(false).asString()
             });
         });
 
